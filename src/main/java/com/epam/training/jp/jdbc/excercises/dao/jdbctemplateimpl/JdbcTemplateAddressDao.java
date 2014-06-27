@@ -29,6 +29,8 @@ public class JdbcTemplateAddressDao extends JdbcDaoSupport implements AddressDao
 		parameters.put("zipcode", address.getZipCode());
 		Number id = insertAddress.executeAndReturnKey(parameters);
 		address.setId(id.intValue());
+		
+		//Az updates hazi a foodDao-ban van
 	}
 
 }
