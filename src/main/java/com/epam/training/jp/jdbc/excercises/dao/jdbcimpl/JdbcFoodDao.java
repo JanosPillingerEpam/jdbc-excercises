@@ -20,17 +20,16 @@ public class JdbcFoodDao extends GenericJdbcDao implements FoodDao {
 	@Override
 	public Food findFoodByName(String name) {
 		Food resultFood = new Food();
-		String sql = "select * from food where NAME= ?";
+		String sql = "select ID, Calories, isVegan, Name, Price from food where NAME= ?";
+		ResultSet rs = null;
 		try (Connection conn = dataSource.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql)) {
+				PreparedStatement ps = conn.prepareStatement(sql);) {
 
 			ps.setString(1, name);
-
-			ResultSet rs = ps.executeQuery();
-
-			if(!rs.next()){
+			 rs = ps.executeQuery();
+			if (!rs.next()) {
 				throw new RuntimeException("no food");
-			}else{
+			} else {
 				resultFood.setId(rs.getInt(1));
 				resultFood.setCalories(rs.getInt(2));
 				resultFood.setVegan(rs.getBoolean(3));
@@ -40,6 +39,14 @@ public class JdbcFoodDao extends GenericJdbcDao implements FoodDao {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			if(rs !=null){
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return resultFood;
 
@@ -53,7 +60,7 @@ public class JdbcFoodDao extends GenericJdbcDao implements FoodDao {
 			ps.setInt(1, newPrice);
 			ps.setString(2, name);
 
-			if(ps.executeUpdate() != 1){
+			if (ps.executeUpdate() != 1) {
 				throw new RuntimeException("not updated properly");
 			}
 
@@ -70,14 +77,14 @@ public class JdbcFoodDao extends GenericJdbcDao implements FoodDao {
 		try (Connection conn = dataSource.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql)) {
 			conn.setAutoCommit(false);
-			for(Food actualFood : foods){
+			for (Food actualFood : foods) {
 				ps.setInt(1, actualFood.getCalories());
 				ps.setBoolean(2, actualFood.isVegan());
 				ps.setString(3, actualFood.getName());
-				ps.setInt(4,actualFood.getPrice());
+				ps.setInt(4, actualFood.getPrice());
 				ps.addBatch();
 			}
-			
+
 			ps.executeBatch();
 			ps.clearBatch();
 			conn.commit();

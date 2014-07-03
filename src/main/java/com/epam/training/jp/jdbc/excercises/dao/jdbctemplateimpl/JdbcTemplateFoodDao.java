@@ -21,8 +21,11 @@ import com.epam.training.jp.jdbc.excercises.domain.Food;
 
 public class JdbcTemplateFoodDao extends JdbcDaoSupport implements FoodDao {
 
+	NamedParameterJdbcTemplate npjt;
+	
 	public JdbcTemplateFoodDao(DataSource dataSource) {
 		setDataSource(dataSource);
+		npjt = new NamedParameterJdbcTemplate(getDataSource());
 	}
 
 	@Override
@@ -51,13 +54,12 @@ public class JdbcTemplateFoodDao extends JdbcDaoSupport implements FoodDao {
 		updatePrice.execute(newPrice, name);
 		
 		/*String sql = "update food set PRICE=? where NAME=?";
-		JdbcTemplate jt = new JdbcTemplate(getDataSource());
+		JdbcTemplate jt = getTemplate();
 		jt.update(sql, new Object[] {newPrice, name});*/
 	}
 
 	@Override
 	public void save(List<Food> foods) {
-		NamedParameterJdbcTemplate npjt = new NamedParameterJdbcTemplate(getDataSource());
 		SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(foods.toArray());
 		String sql = "insert INTO food VALUES(null, :Calories, :Vegan, :Name , :Price)";
 		npjt.batchUpdate(sql,batch);		

@@ -26,6 +26,7 @@ public class JdbcRestaurantDao extends GenericJdbcDao implements RestaurantDao {
 	public List<Food> getFoodsAvailable(Date date, String restaurantName) {
 		List<Food> resultFoodList = new ArrayList<>();
 		String sql = "select * from food join menu_food on food.ID = food_ID join menu on Menu_ID=menu.ID join restaurant on Restaurant_ID=restaurant.ID where restaurant.NAME= ? and (? between FROMDATE and TODATE)";
+		ResultSet rs = null;
 		try (Connection conn = dataSource.getConnection();
 			PreparedStatement ps = conn.prepareStatement(sql)) {
 			
@@ -33,7 +34,7 @@ public class JdbcRestaurantDao extends GenericJdbcDao implements RestaurantDao {
 			ps.setDate(2, sqlDate);
 			ps.setString(1, restaurantName);
 			
-			ResultSet rs = ps.executeQuery();			
+			rs = ps.executeQuery();			
 			
 			Food actualFood;
 			while (rs.next()) {
@@ -48,6 +49,14 @@ public class JdbcRestaurantDao extends GenericJdbcDao implements RestaurantDao {
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			if(rs !=null){
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return resultFoodList;
 	}
@@ -56,10 +65,11 @@ public class JdbcRestaurantDao extends GenericJdbcDao implements RestaurantDao {
 	public List<RestaurantWithAddress> getAllRestaurantsWithAddress() {
 		List<RestaurantWithAddress> resultRestaurantList = new ArrayList<>();
 		String sql = "select * from restaurant join address on ADDRESS_ID = address.ID;";
+		ResultSet rs = null;
 		try (Connection conn = dataSource.getConnection();
 			PreparedStatement ps = conn.prepareStatement(sql)) {
 			
-			ResultSet rs = ps.executeQuery();			
+			rs = ps.executeQuery();			
 			
 			RestaurantWithAddress actualRestaurantWithAddress;
 			Restaurant actualRestaurant;
@@ -84,6 +94,14 @@ public class JdbcRestaurantDao extends GenericJdbcDao implements RestaurantDao {
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			if(rs !=null){
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return resultRestaurantList;
 	}

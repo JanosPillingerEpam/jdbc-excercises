@@ -20,6 +20,7 @@ public class JdbcAddressDao extends GenericJdbcDao implements AddressDao {
 	@Override
 	public void save(Address address) {
 		String sql = "INSERT INTO address (CITY, COUNTRY, STREET, ZIPCODE) VALUES (?, ?, ?, ?)";
+		ResultSet rs = null;
 		try (Connection conn = dataSource.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 			ps.setString(1, address.getCity());
@@ -28,13 +29,21 @@ public class JdbcAddressDao extends GenericJdbcDao implements AddressDao {
 			ps.setString(4, address.getZipCode());
 			
 			ps.executeUpdate();
-			ResultSet rs = ps.getGeneratedKeys();
+			rs = ps.getGeneratedKeys(); //Ez volt a minta megvalositas, es itt sem volt rs bezárva.. :)
 			while (rs.next()) {
 				address.setId(rs.getInt(1));
 			}
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			if(rs !=null){
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 	}
